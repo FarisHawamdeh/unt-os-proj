@@ -35,7 +35,7 @@ int main( int argc, char* argv[] )
 	}
 
 	// Sets Up Normal Distribution.
-	std::default_random_engine generator;
+	std::default_random_engine generator(time(0));
 	std::normal_distribution<double> cycles( 25000000.0, 10000000.0 );
 	std::normal_distribution<double> memory( 5000000.0, 4000000.0 );
 
