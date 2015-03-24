@@ -44,7 +44,6 @@ void generateProcesses()
 		{
 			process currentProcess;
 			currentProcess.id = (1000 + i);
-			outputFile << int(currentProcess.id) << " ";
 
 	        while(1)
 	        {
@@ -75,7 +74,32 @@ void generateProcesses()
 	}
 
 	outputFile.close();
-	unlink("processes.txt");
+}
+
+// Reads Process Data from Input File Passed as Argument
+void readFile(char *fileName)
+{
+	int curProcCycle, curProcMemory;
+	int i = 0;
+	ifstream inputFile;
+	
+	// Attempt to Open File
+	inputFile.open(fileName, ios::in );
+	
+	if (inputFile.is_open())
+	{
+		// Attempt to Read Data From File
+		while ( inputFile >> curProcCycle >> curProcMemory )
+		{
+			process currentProcess;
+			currentProcess.id = i;
+			currentProcess.cycles = curProcCycle;
+			currentProcess.memory = curProcMemory;
+			processList.push_back(currentProcess);
+			i++;
+		}
+		inputFile.close();
+	}
 }
 
 //generates 5 processors with different clock speeds
@@ -262,7 +286,19 @@ int main( int argc, char* argv[] )
 	int choice;
 	bool valid;
 
-	generateProcesses();
+	if(argc == 1)
+	{
+		generateProcesses();
+	}
+	else if(argc == 2)
+	{
+		readFile(argv[1]);
+	}
+	else
+	{
+		cout << "Too Many Arguments!" << endl;
+		return 0;
+	}
 
 	do
 	{
