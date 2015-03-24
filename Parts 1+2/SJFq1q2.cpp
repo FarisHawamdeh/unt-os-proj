@@ -44,7 +44,6 @@ void generateProcesses()
 		{
 			process currentProcess;
 			currentProcess.id = (1000 + i);
-			outputFile << int(currentProcess.id) << " ";
 
 	        while(1)
 	        {
