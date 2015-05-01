@@ -1,0 +1,8 @@
+To Compile On CSE Machines:
+
+g++ main.cpp buddy.cpp -std+c++0x -o proj2
+
+
+To Execute:
+./proj2
+./proj2 *inputFile*  << If You Have A File With Processes.
