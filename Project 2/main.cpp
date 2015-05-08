@@ -26,6 +26,7 @@ struct process {
 vector<process> waitingList;
 vector<process> runningList;
 
+// Generates Processes If No Input File Given
 void generateProcesses()
 {
    double curProcCycle, curProcMemory;
@@ -36,7 +37,7 @@ void generateProcesses()
    // Sets Up Normal Distribution.
    default_random_engine generator(time(0));
    normal_distribution<double> cycles(5000.0, 2500.0);
-   normal_distribution<double> memory(1000.0, 250.0);
+   normal_distribution<double> memory(100.0, 50.0);
 
    // Attempt to Open File
    outputFile.open("processes.txt", ios::trunc );
@@ -46,7 +47,6 @@ void generateProcesses()
       {
          process currentProcess;
          currentProcess.id = (1000 + i);
-         outputFile << int(currentProcess.id) << " ";
 
          while(1)
          {
@@ -64,7 +64,7 @@ void generateProcesses()
          {
             // Generate Number of Cycles and Check If Positive and Within Bound
             curProcMemory = memory(generator);
-            if (curProcMemory > 250.0 && curProcMemory < 10000.0)
+            if (curProcMemory > 8.0 && curProcMemory < 10000.0)
             {
                outputFile << int(curProcMemory) << "\n";
                currentProcess.memory = curProcMemory;
@@ -156,6 +156,7 @@ void mallocExperiment()
       cycleCount++;
    }
 
+	// Loop to "run" remaining processes after waiting list is empty.
    while(!runningList.empty())
    {
       // Look Through Running List To Find a Process That Has Completed.
@@ -180,14 +181,14 @@ void mallocExperiment()
 // Uses myMalloc()
 void buddyExperiment()
 {
-   InitializeBuddyMemoryManager(10240);
+   initializeBuddy(10240);
 
    int cycleCount = 0;
    vector<process>::iterator processListIterator;
 
    processListIterator = waitingList.begin();
 
-   (*processListIterator).data = malloc( (*processListIterator).memory );
+   (*processListIterator).data = myMalloc( (*processListIterator).memory );
    (*processListIterator).finishTime = cycleCount + (*processListIterator).cycles;
 
    cout << "Process " << processListIterator -> id << " allocated " << processListIterator -> memory << " bytes." << endl;
@@ -234,6 +235,7 @@ void buddyExperiment()
       cycleCount++;
    }
 
+	// Loop to "run" remaining processes after waiting list is empty.	
    while(runningList.size())
    {
       // Look Through Running List To Find a Process That Has Completed.
@@ -253,7 +255,7 @@ void buddyExperiment()
       cycleCount++;
    }
 
-   CleanupBuddyMemoryManager();
+   freeBuddy();
    return;
 }
 
@@ -272,6 +274,7 @@ int main( int argc, char* argv[] )
    bool valid;
    struct timeval start, end;
 
+	// Check If InputFile Passed As Argument.
    if(argc == 1)
    {
       generateProcesses();
@@ -286,6 +289,7 @@ int main( int argc, char* argv[] )
       return 0;
    }
 
+	// Ask User For Input.
    do
    {
       printProgramMenu();
@@ -310,6 +314,7 @@ int main( int argc, char* argv[] )
       std::cin.ignore(INT_MAX, '\n');
    }while(!valid);
 
+	// Run Simulation based on User Choice
    if(choice == 1)
    {
       gettimeofday(&start, NULL);

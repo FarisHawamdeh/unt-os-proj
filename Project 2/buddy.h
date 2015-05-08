@@ -7,25 +7,28 @@
 #include <stdlib.h>
 
 // Used To Generate Powers Of Two
-int powerOfTwo(int);
+int powerOfTwo( int );
 
 // Initialize The Memory To Be Used By The Buddy Memory Manager.
-void * InitializeBuddyMemoryManager(unsigned int);
+void * initializeBuddy( unsigned int );
 
 // Frees The Memory Used By The Buddy Memory Manager
-void CleanupBuddyMemoryManager();
+void freeBuddy();
 
 // The malloc() Equivalent For The Buddy Memory Manager
-void * myMalloc(short);
+void * myMalloc( short );
 
 // The free() Equivalent For The Buddy Memory Manager
-bool myFree(void *, short);
+bool myFree( void *, short );
 
 // Checks To See If The Requested Memory Can Be Placed In The Location In The BuddyArray.
-bool CanInsertAtLocation(int);
+bool canInsertAtLocation( int );
+
+// Merges Nodes back together if unused.
+void markMerged( int );
 
 // Marks All Divided Parent Nodes.
-void DivideUP (int);
+void markDivided ( int );
 
 // Log base 2 Function For Integers.
-int Log2 (int);
+int log2 ( int );

@@ -9,25 +9,25 @@
 short * BuddyArray;
 void * AllocatedSpace = NULL;
 
-size_t BASize=0;
-size_t AllocatedSpaceSize=0;
+size_t BASize = 0;
+size_t AllocatedSpaceSize = 0;
 
 // Initialize The Memory Block To Be Used.
-void * InitializeBuddyMemoryManager(unsigned int RequestedSize)
+void * initializeBuddy( unsigned int RequestedSize )
 {
-
-   BASize = powerOfTwo(Log2((int)RequestedSize)- Log2((int)MIN_BLOCK_SIZE)+1);
+	// Calculate the Number of Nodes Needed for the Binary Tree
+   BASize = powerOfTwo( log2( ( int ) RequestedSize ) - log2( ( int ) MIN_BLOCK_SIZE ) + 1 );
    AllocatedSpaceSize = RequestedSize;
 
    // Allocate The Amount of Memory In Bytes
-   AllocatedSpace = malloc((size_t)AllocatedSpaceSize);
+   AllocatedSpace = malloc( (size_t) AllocatedSpaceSize );
 
    // Allocate The Array For The Tree.
    // Max Nodes Should Be: RequestedSize / MIN_BLOCK_SIZE.
-   BuddyArray=(short* ) malloc((size_t) sizeof(short)*(BASize));
+   BuddyArray = ( short* ) malloc( ( size_t ) sizeof( short ) * ( BASize ) );
   
    // If Allocation Failed Return NULL
-   if (AllocatedSpace == NULL || BuddyArray == NULL )
+   if ( AllocatedSpace == NULL || BuddyArray == NULL )
    {
       BASize = 0;
       AllocatedSpaceSize = 0;
@@ -35,146 +35,148 @@ void * InitializeBuddyMemoryManager(unsigned int RequestedSize)
    }
 
    // Initialize Memory Block to All 0s.
-   for(unsigned int i=0; i<BASize; i++)
+   for( unsigned int i = 0; i < BASize; i++ )
    {
-      BuddyArray[i]=(short)0;
+      BuddyArray[ i ] = ( short ) 0;
    }
 
-   // Return Address of Memory Space.
+   // Return Address of Memory Block.
    return AllocatedSpace;
-
 }
 
 // Frees Memory Allocated For Memory Manager;
-void CleanupBuddyMemoryManager()
+void freeBuddy()
 {
   
    BASize = 0;
    AllocatedSpaceSize = 0;
 
-   free (AllocatedSpace);
-   free (BuddyArray);
+   free ( AllocatedSpace );
+   free ( BuddyArray );
 }
 
 // The Function That Returns The Address Of The Memory Block
 // Of The Size That Was Requested.
-void * myMalloc(short MemRequest)
+void * myMalloc( short memorySize )
 {
-	int TreeLevel = 0;
-	int BlockSizeNeeded = AllocatedSpaceSize;
-   int BALoc;
+	int treeLevel = 0;
+	int blockSizeNeeded = AllocatedSpaceSize;
+   int arrayLocation;
 
    // Return NULL If Request Is Larger Than Total Memory
-	if((size_t) MemRequest > AllocatedSpaceSize)
+	if( ( size_t ) memorySize > AllocatedSpaceSize )
    {
       return NULL;
    }
 
    // If Request Less Than Minimum Block Size,
    // Force Minimum Block Size Rule.
-   if (MemRequest < MIN_BLOCK_SIZE)
+   if ( memorySize < MIN_BLOCK_SIZE )
    {
-      MemRequest = MIN_BLOCK_SIZE;
+      memorySize = MIN_BLOCK_SIZE;
    }
 
    // Determine What Tree Level The Memory Request Will Need
-	while(1)
+	while( 1 )
    {
-		if( (MemRequest <= BlockSizeNeeded) && (MemRequest > (BlockSizeNeeded/2)) )
+		if( ( memorySize <= blockSizeNeeded ) && ( memorySize > ( blockSizeNeeded / 2 ) ) )
       {
 			break;
       }
       else
       {
-			BlockSizeNeeded /= 2;
-			TreeLevel++;
+			blockSizeNeeded /= 2;
+			treeLevel++;
 		}
 	}
 
    // Check The Blocks On The Tree To Find One That Can Be Used.
-	for( BALoc = powerOfTwo(TreeLevel)-1; BALoc <= (powerOfTwo(TreeLevel+1)-2); BALoc++ )
+	for( arrayLocation = powerOfTwo( treeLevel ) - 1; arrayLocation <= ( powerOfTwo( treeLevel + 1 ) - 2 ); arrayLocation++ )
    {
-		if(BuddyArray[BALoc] == 0 && CanInsertAtLocation(BALoc))
+		if( BuddyArray[ arrayLocation ] == 0 && canInsertAtLocation( arrayLocation ) )
       {
-			BuddyArray[BALoc]=(short)MemRequest;
-			DivideUP(BALoc);
+			BuddyArray[ arrayLocation ] = ( short ) memorySize;
+			markDivided( arrayLocation );
 			break;
 		}
    }
 
    // If No Free Block Available, Return Null.
-	if(BALoc == powerOfTwo(TreeLevel+1)-1)
+	if( arrayLocation == powerOfTwo( treeLevel + 1 ) - 1 )
    {
       return NULL;
    }
 
    // Return the Address Of The Allocated Space With The Offset.
-   return (void*) (reinterpret_cast<char*>(AllocatedSpace) + ( ( BALoc + 1 - powerOfTwo(TreeLevel)) * BlockSizeNeeded ) );
- 
-
+   return ( void * ) ( reinterpret_cast<char*>( AllocatedSpace ) + ( ( arrayLocation + 1 - powerOfTwo(treeLevel) ) * blockSizeNeeded ) );
 }
 
 // The Function That Performs The Equivalent of Free() For The Buddy System
-bool myFree(void * AddressPtr,short MemSize){
-
-   int BlockSizeNeeded = AllocatedSpaceSize;
-   int TreeLevel = 0;
+bool myFree( void * addressPtr, short memorySize )
+{
+   int blockSizeNeeded = AllocatedSpaceSize;
+   int treeLevel = 0;
 
    // Get The Offset From The Address Given By Using the AllocatedSpace Address.
-   short offset = (short)( reinterpret_cast<char*>(AddressPtr) - reinterpret_cast<char*>(AllocatedSpace));
+   short offset = ( short )( reinterpret_cast<char*>( addressPtr ) - reinterpret_cast<char*>( AllocatedSpace ) );
 
-   if (offset < 0 )
+	// If Offset Is Negative Return false as Error
+   if ( offset < 0 )
    { 
       return false;
    }
 
-   if (MemSize < MIN_BLOCK_SIZE) {MemSize = MIN_BLOCK_SIZE;}
+   // If Request Less Than Minimum Block Size,
+   // Force Minimum Block Size Rule.
+   if ( memorySize < MIN_BLOCK_SIZE )
+	{
+		memorySize = MIN_BLOCK_SIZE;
+	}
 
-   //Determine what treelevel the MemSize will land on 
-	while(1)
+   //Determine what tree level the memory block is on.
+	while( 1 )
    {
-	   if( (MemSize<=BlockSizeNeeded) && ( MemSize>(BlockSizeNeeded/2)))
+	   if( ( memorySize <= blockSizeNeeded ) && ( memorySize > ( blockSizeNeeded / 2 ) ) )
       {
 			break;
       }
       else
       {
-			BlockSizeNeeded/=2;
-         TreeLevel++;
+			blockSizeNeeded /= 2;
+         treeLevel++;
 		}
 	}
 
-   int BALoc = (powerOfTwo(TreeLevel)) + (offset / BlockSizeNeeded) - 1;
+	// Calculate which node the memory block is assigned.
+   int arrayLocation = ( powerOfTwo( treeLevel ) ) + ( offset / blockSizeNeeded ) - 1;
 
-	BuddyArray[BALoc] = 0;
-	while(BALoc != 0)
-	{
-		if( BuddyArray[BALoc % 2 == 0 ? BALoc - 1: BALoc + 1] == 0 && BuddyArray[BALoc] == 0)
-		{
-			BuddyArray[BALoc % 2 == 0 ? (BALoc - 1) / 2 : BALoc / 2] = 0;
-			BALoc = BALoc % 2 == 0 ? (BALoc - 1) / 2 : BALoc / 2;
-		}
-		else break;
-	}
+	// Mark Block as Unused.
+	BuddyArray[ arrayLocation ] = 0;
+
+	// Merge Nodes
+	markMerged( arrayLocation );
 
    return true;
 }
 
-// Check To See If The Requested Memory Can Be Placed In Location In The BuddyArray.
-bool CanInsertAtLocation(int Location)
+// Check To See If The Requested Memory Can Be Placed In the Location In The BuddyArray.
+bool canInsertAtLocation( int currentNode )
 {
-   while(Location != 0)
+   // Start At Bottom and Move Up The Parent Nodes.
+   while( currentNode != 0 )
    {
-      if(Location % 2 == 0)
+		// Move Up One Level
+      if( currentNode % 2 == 0 )
       {
-	      Location = (Location - 1) / 2;
+	      currentNode = ( currentNode - 1 ) / 2;
       }
       else 
       {
-         Location = Location / 2;
+         currentNode = currentNode / 2;
       }
 
-      if(BuddyArray[Location] > 1)
+		// Check If Block Is Used
+      if( BuddyArray[ currentNode ] > 1 )
       {
 	      return false;
       }
@@ -183,32 +185,75 @@ bool CanInsertAtLocation(int Location)
 	return true;
 }
 
-//Marks All Divided Parent Nodes.
-void DivideUP (int CurrentNode)
+// Merges Nodes back together if unused.
+void markMerged( int currentNode )
 {
-
-   // Start At Bottom and Move Up The Parent Nodes.
-	while(CurrentNode != 0)
+	// Start At currentNode and Move Up The Parent Nodes.
+	while( currentNode != 0 )
 	{
-      if ((CurrentNode % 2) == 0)
-      {
-         CurrentNode = (CurrentNode - 1) / 2;
-      }
-      else 
-      {
-         CurrentNode /= 2;
-      }
+		// Check If Left or Right Node
+		if( currentNode % 2 == 0 )
+		{
+			// Check If Left and Right Unused
+			if( BuddyArray[ currentNode - 1 ] == 0 && BuddyArray[ currentNode ] == 0 )
+			{
+				// Mark Parent As Merged, ie UnDivided
+				BuddyArray[ ( currentNode - 1 ) / 2 ] = 0;
 
-		BuddyArray[CurrentNode] = 1;
+				// Move Up One Level
+				currentNode = ( currentNode - 1 ) / 2;
+			}
+			else 
+			{
+				break;
+			}
+		}
+		else
+		{
+			// Check If Left and Right Unused
+			if( BuddyArray[ currentNode + 1 ] == 0 && BuddyArray[ currentNode ] == 0 )
+			{
+				// Mark Parent As Merged, ie UnDivided
+				BuddyArray[ currentNode / 2 ] = 0;
+
+				// Move Up One Level
+				currentNode = currentNode / 2;
+			}
+			else 
+			{
+				break;
+			}
+		}
 	}
 }
 
-int powerOfTwo(int exp)
+// Marks All Parent Nodes As Divided.
+void markDivided( int currentNode )
 {
-   return (1 << (exp));
+   // Start At currentNode and Move Up The Parent Nodes.
+	while( currentNode != 0 )
+	{
+		// Move Up One Level.
+      if ( ( currentNode % 2 ) == 0 )
+      {
+         currentNode = ( currentNode - 1 ) / 2;
+      }
+      else 
+      {
+         currentNode /= 2;
+      }
+
+		// Mark As Divided.
+		BuddyArray[ currentNode ] = 1;
+	}
 }
 
-int Log2 (int Value)
+int powerOfTwo( int exp )
+{
+   return ( 1 << ( exp ) );
+}
+
+int log2 (int Value)
 {
   //This code based on code from 
   //http://graphics.stanford.edu/~seander/bithacks.html#IntegerLog 

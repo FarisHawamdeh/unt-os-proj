@@ -1,8 +1,16 @@
 To Compile On CSE Machines:
 
-g++ main.cpp buddy.cpp -std=c++0x -o proj2
+Use makefile or,
 
+g++ main.cpp buddy.cpp -std=c++0x -o simulator
+g++ processGeneratorSmall.cpp -std=c++0x -o smallMemoryGenerator
+g++ processGeneratorMedium.cpp -std=c++0x -o mediumMemoryGenerator
+g++ processGeneratorLarge.cpp -std=c++0x -o largeMemoryGenerator
 
 To Execute:
-./proj2
-./proj2 *inputFile*  << If You Have A File With Processes.
+./simulator
+./simulator *inputFile*  << If You Have A File With Processes.
+
+./smallMemoryGenerator *numberOfProcesses* *OutputFileName*  << generates processes with ~100 bytes of memory
+./mediumMemoryGenerator *numberOfProcesses* *OutputFileName* << generates processes with ~200 bytes of memory
+./largeMemoryGenerator *numberOfProcesses* *OutputFileName*  << generates processes with ~1000 bytes of memory 
