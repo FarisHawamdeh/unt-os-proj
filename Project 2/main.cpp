@@ -150,6 +150,8 @@ void mallocExperiment()
             cout << "Process " << processListIterator -> id << " freed " << processListIterator -> memory << " bytes." << endl;
             free( (*processListIterator).data );
             runningList.erase( runningList.begin() + (processListIterator - runningList.begin()) );
+				runningList.shrink_to_fit();
+				break;
          }
       }
 
