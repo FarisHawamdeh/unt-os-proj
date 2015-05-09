@@ -1,6 +1,6 @@
 // CSCE 4600
 // Project 2 - buddy.h
-// Faris Hawamdeh
+// Faris Hawamdeh, Dustin Fennessy, Eric Guzman
 
 #include <stdio.h>
 #include <cstdlib>

@@ -1,6 +1,6 @@
 // CSCE 4600
 // Project 2 - main.cpp
-// Faris Hawamdeh
+// Faris Hawamdeh, Dustin Fennessy, Eric Guzman
 
 #include "buddy.h"
 

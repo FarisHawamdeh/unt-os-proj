@@ -1,6 +1,6 @@
-// Faris Hawamdeh
 // CSCE 4600
-// Homework 2 - Problem 3
+// processGeneratorSmall.cpp
+// Faris Hawamdeh, Dustin Fennessy, Eric Guzman
 
 #include <iostream>
 #include <random>
